@@ -20,7 +20,7 @@ The long-term ASTRA vision remains broad. Implementation proceeds through small,
 
 **Current milestone:** M0 - Foundation and Engineering Environment
 
-**Status:** In progress - Steps 1-4 specified; implementation validation remains
+**Status:** In progress - Steps 1-4 specified; Permission Boundary v0 verified; completion gate remains
 
 **Current result:** ASTRA's Python control-plane skeleton is working. The JavaScript target repository baseline is created with one intentionally failing test.
 
@@ -296,6 +296,22 @@ repeated actions and out-of-scope patches must be rejected and recorded.
 **Evidence contract:** A run record connects the human goal, repository
 observations, approval, actions, changed files, test result, final status and
 limitations. A model response alone is not evidence.
+
+### Permission Boundary v0 implementation
+
+`astra-system/src/astra/permissions.py` now evaluates the locked M0 rules
+without executing commands. Its tests cover target path reads, Git read
+operations, the exact test command, approval-gated writes, evidence paths and
+blocked actions.
+
+Verification on 14 October 2026:
+
+```text
+10 passed in 0.05s
+```
+
+This validates the permission decision layer only. It does not yet execute
+commands, inspect the target repository through ASTRA or modify target files.
 
 The first public LinkedIn post is intentionally deferred until ASTRA completes a
 stronger end-to-end engineering loop with inspectable evidence. The planned

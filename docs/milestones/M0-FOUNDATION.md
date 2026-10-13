@@ -1,6 +1,6 @@
 # ASTRA M0 --- Foundation and Engineering Environment
 
-**Status:** IN PROGRESS - Steps 1-4 specified; implementation validation remains
+**Status:** IN PROGRESS - Steps 1-4 specified; Permission Boundary v0 verified; completion gate remains
 
 **Milestone purpose:** Define the first small, safe and measurable ASTRA prototype before implementation begins.
 
@@ -88,6 +88,11 @@ The two implementation areas will have separate responsibilities and separate te
 **Progress record:** M0 Step 3 target baseline created on 13 October 2026. The seeded test produces one expected failure and is ready to become ASTRA's first bounded engineering task.
 
 **Progress record:** M0 Step 3 baseline verified on 13 October 2026. The target test reports one expected failure because the completed task remains in the pending list.
+
+**Progress record:** Permission Boundary v0 implemented and verified on 14
+October 2026. The ASTRA test suite reports 10 passed tests covering the
+control-plane identity, target path reads, Git observations, the allowlisted
+test command, approval-gated writes, evidence paths and blocked actions.
 
 **Progress record:** On 14 October 2026, the developer chose to delay the first
 public LinkedIn post until ASTRA demonstrates a stronger end-to-end result. The

@@ -54,3 +54,26 @@ The current output is:
 
 This is a foundation check only. It verifies the Python control-plane identity;
 it does not mean that ASTRA can use an AI model or modify a repository yet.
+
+## Permission Boundary v0
+
+`src/astra/permissions.py` contains the first deterministic permission policy.
+It returns an allow or deny decision with a reason; it does not execute
+commands or modify files.
+
+The checks currently cover:
+
+- reads inside the approved `test-repo/` target;
+- read-only Git observations;
+- the exact `npm.cmd test` command from the target root;
+- writes that have both human approval and an approved file path;
+- evidence writes inside `astra-system/runs/`;
+- blocked actions such as install, network, deletion and push.
+
+Verify the permission policy with:
+
+```powershell
+.\astra-system\.venv\Scripts\python.exe -m pytest astra-system -vv
+```
+
+Current result: `10 passed` on 14 October 2026.
