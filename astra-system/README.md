@@ -92,3 +92,9 @@ and represents no real AI capability. The current M1 tests verify request
 validation, normalized responses and empty-provider-response handling.
 
 Full ASTRA verification currently reports `15 passed` on 14 October 2026.
+
+The complete milestone specification is available at:
+
+```text
+docs/milestones/M1-MODEL-GATEWAY.md
+```

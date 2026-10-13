@@ -54,6 +54,7 @@ This separation lets us test ASTRA as an engineering system instead of giving it
 - [Research status](docs/04-RESEARCH-STATUS.md)
 - [Prototype roadmap](docs/05-PROTOTYPE-ROADMAP.md)
 - [M0 foundation specification](docs/milestones/M0-FOUNDATION.md)
+- [M1 model gateway specification](docs/milestones/M1-MODEL-GATEWAY.md)
 
 ## Approved M0 decisions
 
@@ -341,6 +342,11 @@ M1 verification on 14 October 2026:
 This validates the gateway contract and request validation. It does not call a
 real AI provider yet. Provider selection, configuration, timeout behavior and
 token/latency/cost logging remain in the next M1 slice.
+
+The complete M1 specification is in
+[M1-MODEL-GATEWAY.md](docs/milestones/M1-MODEL-GATEWAY.md). M1 is currently in
+progress; the deterministic gateway contract is verified, while real provider
+integration remains open.
 
 The first public LinkedIn post is intentionally deferred until ASTRA completes a
 stronger end-to-end engineering loop with inspectable evidence. The planned
