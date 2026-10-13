@@ -20,9 +20,9 @@ The long-term ASTRA vision remains broad. Implementation proceeds through small,
 
 **Current milestone:** M0 - Foundation and Engineering Environment
 
-**Status:** In progress
+**Status:** In progress - Steps 1 and 2 approved; Step 3 baseline complete
 
-**Current result:** ASTRA's Python control-plane skeleton is working and its first test passes.
+**Current result:** ASTRA's Python control-plane skeleton is working. The JavaScript target repository baseline is created with one intentionally failing test.
 
 ## Project structure
 
@@ -142,6 +142,28 @@ Verification result:
 
 This foundation check confirms that the Python package, test discovery and basic control-plane entry point work. It does not mean that ASTRA can use an AI model or modify a repository yet.
 
+### JavaScript target repository baseline
+
+The target repository now contains a small backend flow:
+
+```text
+Controller -> Service -> Repository -> Model -> Test
+```
+
+The seeded task is:
+
+> After a task is completed, it must not appear in the pending-task list.
+
+Baseline test evidence:
+
+```text
+1 test
+0 passed
+1 failed
+```
+
+Observed failure: the completed task remains in the pending list. This is an intentional baseline defect for ASTRA's first engineering task.
+
 ## Concepts covered so far
 
 ### Control plane
@@ -210,9 +232,11 @@ ASTRA 0.1.0 - foundation
 
 ## Current task
 
-### M0 Step 3 - Define the JavaScript target repository
+### M0 Step 3 - JavaScript target repository baseline
 
-The next task is to define the small JavaScript/MERN-style project that ASTRA will inspect later.
+**Status:** Complete on 13 October 2026.
+
+The target repository has been defined and scaffolded. Its structure, baseline failure and reproducibility have been verified.
 
 The target repository must have:
 
@@ -229,6 +253,18 @@ The task will be designed so ASTRA can later:
 ```text
 Inspect -> Identify relevant files -> Plan -> Request approval -> Modify -> Test -> Report evidence
 ```
+
+Current evidence:
+
+- `test-repo/server/controllers/taskController.js` exists.
+- `test-repo/server/services/taskService.js` exists.
+- `test-repo/server/repositories/taskRepository.js` exists.
+- `test-repo/server/models/task.js` exists.
+- `test-repo/test/taskController.test.js` reproduces the expected failure.
+
+### M0 Step 4 - ASTRA permission boundary and success metrics
+
+**Next task:** Define what the future ASTRA agent may read, write and execute, then define how its engineering result will be measured.
 
 ## Next ASTRA concepts
 

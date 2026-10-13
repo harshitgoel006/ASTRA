@@ -85,6 +85,10 @@ The two implementation areas will have separate responsibilities and separate te
 
 **Decision record:** M0 Step 2 - Separate the Python ASTRA system from the JavaScript target repository. Approved by the human developer on 13 October 2026.
 
+**Progress record:** M0 Step 3 target baseline created on 13 October 2026. The seeded test produces one expected failure and is ready to become ASTRA's first bounded engineering task.
+
+**Progress record:** M0 Step 3 baseline verified on 13 October 2026. The target test reports one expected failure because the completed task remains in the pending list.
+
 ## 5. Proposed technology baseline
 
 | Area | Proposed choice | Reason |
