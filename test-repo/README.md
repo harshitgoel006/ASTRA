@@ -38,3 +38,14 @@ Run the baseline test with:
 ```powershell
 npm.cmd test
 ```
+
+For a readable test name and the diagnostic messages from the test:
+
+```powershell
+npm.cmd run test:verbose
+```
+
+The current expected baseline result is one failing test. That failure is
+intentional: `taskService.js` returns a completed copy but does not save the
+updated status through `taskRepository.js`. ASTRA will later inspect this flow
+and propose the fix.

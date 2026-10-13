@@ -30,6 +30,12 @@ Run the tests from the project root:
 .\astra-system\.venv\Scripts\python.exe -m pytest astra-system
 ```
 
+To see the exact test name instead of only the summary count:
+
+```powershell
+.\astra-system\.venv\Scripts\python.exe -m pytest astra-system -vv
+```
+
 Run the control-plane entry point:
 
 ```powershell
@@ -41,7 +47,10 @@ $env:PYTHONPATH = (Resolve-Path .\src).Path
 The current output is:
 
 ```text
-ASTRA 0.1.0 - foundation
+[ASTRA control plane] identity: ASTRA 0.1.0
+[ASTRA control plane] status: foundation
+[ASTRA control plane] target repository access: not connected yet
 ```
 
-This is a foundation check. It does not mean that ASTRA can use an AI model or modify a repository yet.
+This is a foundation check only. It verifies the Python control-plane identity;
+it does not mean that ASTRA can use an AI model or modify a repository yet.

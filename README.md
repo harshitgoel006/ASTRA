@@ -131,7 +131,9 @@ astra-system/
 Current behavior:
 
 ```text
-ASTRA 0.1.0 - foundation
+[ASTRA control plane] identity: ASTRA 0.1.0
+[ASTRA control plane] status: foundation
+[ASTRA control plane] target repository access: not connected yet
 ```
 
 Verification result:
@@ -140,7 +142,17 @@ Verification result:
 1 passed
 ```
 
-This foundation check confirms that the Python package, test discovery and basic control-plane entry point work. It does not mean that ASTRA can use an AI model or modify a repository yet.
+This `1 passed` belongs only to
+`astra-system/tests/test_control_plane.py`. The test name is
+`test_control_plane_reports_foundation_identity_only`; it confirms that the
+Python package reports the expected ASTRA identity. It does not read or modify
+`test-repo/`.
+
+Use `-vv` to see the exact test name:
+
+```powershell
+.\astra-system\.venv\Scripts\python.exe -m pytest astra-system -vv
+```
 
 ### JavaScript target repository baseline
 
@@ -227,7 +239,9 @@ $env:PYTHONPATH = (Resolve-Path .\src).Path
 Expected result:
 
 ```text
-ASTRA 0.1.0 - foundation
+[ASTRA control plane] identity: ASTRA 0.1.0
+[ASTRA control plane] status: foundation
+[ASTRA control plane] target repository access: not connected yet
 ```
 
 ## Current task
