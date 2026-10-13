@@ -71,6 +71,20 @@ The first repository operated on by ASTRA will use JavaScript with Node.js. This
 
 Keeping these systems separate lets us verify that ASTRA can work on a repository through its tools instead of relying on special access to its own source code.
 
+### Project structure
+
+```text
+ASTRA_Codex_Context_Pack/
+├── astra-system/       # Python ASTRA control plane
+├── test-repo/          # JavaScript/Node.js target repository
+├── docs/               # Vision, architecture, milestones and evidence formats
+└── CODEX.md            # Operating contract for implementation work
+```
+
+The two implementation areas will have separate responsibilities and separate tests. The working target location is `test-repo/`.
+
+**Decision record:** M0 Step 2 - Separate the Python ASTRA system from the JavaScript target repository. Approved by the human developer on 13 October 2026.
+
 ## 5. Proposed technology baseline
 
 | Area | Proposed choice | Reason |
