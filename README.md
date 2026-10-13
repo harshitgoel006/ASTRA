@@ -16,13 +16,15 @@ The long-term ASTRA vision remains broad. Implementation proceeds through small,
 
 ## Current status
 
-**Date:** 13 October 2026
+**Date:** 14 October 2026
 
-**Current milestone:** M0 - Foundation and Engineering Environment
+**Current milestone:** M1 - Model Gateway
 
-**Status:** In progress - Steps 1-4 specified; Permission Boundary v0 verified; completion gate remains
+**Status:** M0 complete; M1 gateway v0 verified; provider integration remains
 
-**Current result:** ASTRA's Python control-plane skeleton is working. The JavaScript target repository baseline is created with one intentionally failing test.
+**Current result:** ASTRA has a verified deterministic permission layer and a
+provider-independent model gateway contract. The JavaScript target repository
+baseline remains a separate intentionally failing engineering task.
 
 ## Project structure
 
@@ -312,6 +314,33 @@ Verification on 14 October 2026:
 
 This validates the permission decision layer only. It does not yet execute
 commands, inspect the target repository through ASTRA or modify target files.
+
+### M0 completion
+
+M0 was completed on 14 October 2026 after the thesis, target repository,
+permission boundary, success metrics, threat responses and evidence format were
+specified and reviewed. The completion evidence includes 10 passing ASTRA
+permission and foundation tests.
+
+### M1 Model Gateway v0
+
+`astra-system/src/astra/model_gateway.py` now provides:
+
+- `ModelRequest` for bounded model input;
+- `ModelProvider` as the provider adapter contract;
+- `ModelGateway` as the single validated model entry point;
+- `ModelResponse` as the normalized response shape;
+- `DeterministicProvider` for local tests without AI, network or cost.
+
+M1 verification on 14 October 2026:
+
+```text
+15 passed in 0.08s
+```
+
+This validates the gateway contract and request validation. It does not call a
+real AI provider yet. Provider selection, configuration, timeout behavior and
+token/latency/cost logging remain in the next M1 slice.
 
 The first public LinkedIn post is intentionally deferred until ASTRA completes a
 stronger end-to-end engineering loop with inspectable evidence. The planned

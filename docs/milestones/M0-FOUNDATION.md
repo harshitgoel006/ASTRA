@@ -1,6 +1,6 @@
 # ASTRA M0 --- Foundation and Engineering Environment
 
-**Status:** IN PROGRESS - Steps 1-4 specified; Permission Boundary v0 verified; completion gate remains
+**Status:** COMPLETE - Specification approved and Permission Boundary v0 verified on 14 October 2026
 
 **Milestone purpose:** Define the first small, safe and measurable ASTRA prototype before implementation begins.
 
@@ -93,6 +93,11 @@ The two implementation areas will have separate responsibilities and separate te
 October 2026. The ASTRA test suite reports 10 passed tests covering the
 control-plane identity, target path reads, Git observations, the allowlisted
 test command, approval-gated writes, evidence paths and blocked actions.
+
+**Completion record:** The M0 completion gate was accepted on 14 October 2026.
+The thesis, separate systems, target task, permission boundary, evaluation
+criteria, threat responses and evidence format are now the approved foundation
+for M1 implementation.
 
 **Progress record:** On 14 October 2026, the developer chose to delay the first
 public LinkedIn post until ASTRA demonstrates a stronger end-to-end result. The
@@ -339,6 +344,9 @@ M0 is complete when the human developer approves:
 - the public demonstration plan.
 
 Only after this gate should ASTRA implementation begin.
+
+**Gate result:** Complete. M1 implementation may proceed. M1 provider selection
+and model-specific integration remain separate decisions under the M1 scope.
 
 ## 15. Open decisions
 

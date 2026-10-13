@@ -18,7 +18,8 @@ This directory will contain the ASTRA control plane.
 - pytest for ASTRA tests
 - SQLite and JSONL for initial local state
 
-Implementation begins after the M0 foundation decisions are approved.
+M0 foundation decisions are complete. M1 now implements a provider-independent
+model gateway before a real provider is selected.
 
 ## Current foundation skeleton
 
@@ -77,3 +78,17 @@ Verify the permission policy with:
 ```
 
 Current result: `10 passed` on 14 October 2026.
+
+## Model Gateway v0
+
+`src/astra/model_gateway.py` defines the first controlled model boundary:
+
+```text
+ASTRA request -> ModelGateway -> ModelProvider adapter -> ModelResponse
+```
+
+`DeterministicProvider` is a local test adapter. It makes no network request
+and represents no real AI capability. The current M1 tests verify request
+validation, normalized responses and empty-provider-response handling.
+
+Full ASTRA verification currently reports `15 passed` on 14 October 2026.
