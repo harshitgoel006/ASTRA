@@ -1,6 +1,6 @@
 # ASTRA M0 --- Foundation and Engineering Environment
 
-**Status:** IN PROGRESS - Step 1 approved; remaining M0 decisions open
+**Status:** IN PROGRESS - Steps 1-4 specified; implementation validation remains
 
 **Milestone purpose:** Define the first small, safe and measurable ASTRA prototype before implementation begins.
 
@@ -89,6 +89,11 @@ The two implementation areas will have separate responsibilities and separate te
 
 **Progress record:** M0 Step 3 baseline verified on 13 October 2026. The target test reports one expected failure because the completed task remains in the pending list.
 
+**Progress record:** On 14 October 2026, the developer chose to delay the first
+public LinkedIn post until ASTRA demonstrates a stronger end-to-end result. The
+planned public demonstration is the first verified loop from repository
+understanding through evidence, targeted at M7-M8.
+
 ## 5. Proposed technology baseline
 
 | Area | Proposed choice | Reason |
@@ -137,39 +142,66 @@ The first prototype will not attempt to build:
 
 ## 8. Initial permission boundary
 
-### Allowed in the proposed prototype
+The permission boundary is ASTRA's authority contract. It defines which
+actions a future agent may request and which actions the control plane must
+reject before execution.
 
-- Read files inside the approved sample repository.
-- Inspect Git status, history and diff.
-- Run explicitly allowed test commands.
-- Write files only inside the approved workspace after approval.
-- Create logs and evidence reports inside the ASTRA run directory.
+### Locked prototype permission matrix
 
-### Prohibited in the proposed prototype
+| Capability | Initial decision | Condition |
+|---|---|---|
+| Read target files | Allow | Only inside `test-repo/` |
+| Read Git status | Allow | `git status --short`, only for the target repository |
+| Read Git history and diff | Allow | Read-only Git inspection for the target repository |
+| Run tests | Allow | Only `npm.cmd test` from the `test-repo/` directory, with a 60-second timeout |
+| Write target files | Allow after approval | Only files included in the approved plan |
+| Write run evidence | Allow | Only inside `astra-system/runs/` |
+| Read outside the workspace | Deny | No home directory, credential store or unrelated project access |
+| Read secrets | Deny | No environment secrets, tokens or private keys |
+| Arbitrary shell commands | Deny | Only the commands listed in this matrix are allowed |
+| Delete files | Deny initially | Requires a later, separately approved capability |
+| Network access | Deny initially | Not needed for the first local vertical slice |
+| Install dependencies | Deny initially | Prevents unapproved network and lockfile changes |
+| Commit, push, merge or deploy | Deny | Outside the prototype scope |
 
-- Reading files outside the approved workspace.
+**Decision record:** The developer approved and locked this prototype permission
+boundary on 14 October 2026. The boundary applies to ASTRA's operations on the
+target repository. The control plane can still read and write its own source,
+tests and run evidence according to the project workflow.
+
+### Boundary summary
+
+The locked prototype allows only the capabilities listed in the matrix above.
+
+The locked prototype denies:
+
+- Reading files outside `test-repo/`.
 - Reading environment secrets or credential stores.
-- Deleting arbitrary files.
-- Running unrestricted shell commands.
-- Network access unless a later milestone explicitly enables it.
-- Changing production systems.
-- Deploying or merging changes automatically.
-- Continuing after the iteration, time or cost budget is exhausted.
+- Deleting files, installing dependencies or using network access.
+- Running commands outside the explicit allowlist.
+- Committing, pushing, merging, deploying or changing production systems.
+- Continuing after the timeout or retry budget is exhausted.
 
-## 9. Proposed success metrics
+## 9. Initial success metrics
 
-M0 will define the measurement method for the following metrics:
+The following criteria are the initial evaluation contract for the first
+vertical slice. They measure observable behavior; they do not measure whether
+the model sounds intelligent.
 
-1. **Repository understanding:** Can ASTRA identify relevant files and tests, with source references?
-2. **Plan quality:** Can a human review the plan before execution?
-3. **Change boundary:** Did ASTRA modify only approved files?
-4. **Test result:** Did the relevant test run, and what did it report?
-5. **Evidence completeness:** Are the claim, diff, command and result connected?
-6. **Safety behavior:** Were prohibited actions blocked?
-7. **Reproducibility:** Can the same task be rerun and inspected?
-8. **Resource use:** Were iterations, tokens, time and cost within budget?
+| Metric | Pass condition for the first slice |
+|---|---|
+| Repository understanding | The relevant test and the four source files in the target flow are identified with paths and a reason for each. |
+| Plan quality | The plan states the suspected cause, proposed file change, verification command and scope. A human can approve it before writing. |
+| Change boundary | The final diff contains only files approved in the plan. Any out-of-scope path causes the run to stop. |
+| Test result | `npm.cmd test` runs from `test-repo/`, finishes within 60 seconds and exits with code `0` after the fix. |
+| Evidence completeness | The run records the goal, observations, approval, changed files, command, exit code, result and limitation. |
+| Safety behavior | A prohibited action is rejected before execution and recorded as a denied action. |
+| Reproducibility | A second run against the same repository state produces the same test result and an explainable diff. |
+| Resource use | The run stays within the configured command timeout and retry limit. Model token and monetary budgets will be set when M1 begins. |
 
-M0 will not claim a success percentage until the first evaluation procedure is defined.
+For the first vertical slice, all rows must pass. A partial result is reported
+as failed or incomplete; it cannot be reported as a successful engineering
+change merely because the model produced a plausible explanation.
 
 ## 10. Initial threat model questions
 
@@ -186,7 +218,74 @@ M0 must answer these questions before tool execution is implemented:
 
 The threat model will be small and prototype-focused. It will expand in M2 and M9.
 
-## 11. Research required for M0
+### M0 threat responses
+
+| Situation | Required prototype response |
+|---|---|
+| Model requests a prohibited command | Reject it before execution, record the reason and continue only if a safe next action exists. |
+| Repository content contains malicious instructions | Treat repository text as untrusted data. Project files cannot override ASTRA's system policy or permission boundary. |
+| Test command hangs | Stop it at the 60-second timeout, record the timeout and mark verification as failed. |
+| Agent repeats the same action | Stop after three attempts for the same action and record the retry limit. |
+| Patch changes an unapproved file | Reject the patch before applying it and record the out-of-scope path. |
+| Model reports success but the test fails | Trust the deterministic test result; mark the run failed and include the failure output. |
+| Task needs a missing permission | Pause before execution and require a new human decision. |
+| Human needs to stop execution | Support cancellation before the next tool action; a cancelled run cannot be reported as successful. |
+
+These responses are specification requirements until they are enforced by the
+tool execution layer and covered by tests.
+
+## 11. Initial evidence report format
+
+Every ASTRA run will produce a machine-readable record and a human-readable
+summary. The initial record uses this structure:
+
+```json
+{
+  "run_id": "run-YYYYMMDD-HHMMSS",
+  "goal": "Human task statement",
+  "target_root": "test-repo",
+  "baseline": {
+    "git_status": "...",
+    "git_revision": "..."
+  },
+  "observations": [
+    {
+      "path": "server/services/taskService.js",
+      "location": "completeTask",
+      "fact": "The completed copy is returned without being saved."
+    }
+  ],
+  "plan": {
+    "summary": "Save the completed task through the repository.",
+    "approved": true,
+    "approved_files": ["server/services/taskService.js"]
+  },
+  "actions": [
+    {
+      "type": "write",
+      "path": "server/services/taskService.js",
+      "status": "allowed"
+    },
+    {
+      "type": "test",
+      "command": "npm.cmd test",
+      "exit_code": 0
+    }
+  ],
+  "changed_files": ["server/services/taskService.js"],
+  "verification": {
+    "result": "passed",
+    "tests": {"passed": 1, "failed": 0}
+  },
+  "final_status": "success",
+  "limitations": []
+}
+```
+
+The evidence report must connect each claim to an observation, action, diff or
+deterministic command result. A model response by itself is not evidence.
+
+## 12. Research required for M0
 
 M0 research should be targeted rather than broad:
 
@@ -204,7 +303,7 @@ For each topic, the workflow is:
 Learn the concept -> Run a small experiment -> Record the decision -> Continue
 ```
 
-## 12. M0 deliverables
+## 13. M0 deliverables
 
 - This specification, updated after discussion.
 - Selected sample repository and stack.
@@ -215,7 +314,12 @@ Learn the concept -> Run a small experiment -> Record the decision -> Continue
 - Evidence report outline.
 - Public milestone post outline.
 
-## 13. Completion gate
+The M0 result will be documented internally first. A public post will be
+prepared after the first verified end-to-end engineering loop has evidence that
+others can inspect. The post will describe the target task, changed files,
+test result and current limitations.
+
+## 14. Completion gate
 
 M0 is complete when the human developer approves:
 
@@ -231,7 +335,7 @@ M0 is complete when the human developer approves:
 
 Only after this gate should ASTRA implementation begin.
 
-## 14. Open decisions
+## 15. Open decisions
 
 These decisions remain open until reviewed together:
 

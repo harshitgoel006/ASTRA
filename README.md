@@ -20,7 +20,7 @@ The long-term ASTRA vision remains broad. Implementation proceeds through small,
 
 **Current milestone:** M0 - Foundation and Engineering Environment
 
-**Status:** In progress - Steps 1 and 2 approved; Step 3 baseline complete
+**Status:** In progress - Steps 1-4 specified; implementation validation remains
 
 **Current result:** ASTRA's Python control-plane skeleton is working. The JavaScript target repository baseline is created with one intentionally failing test.
 
@@ -278,7 +278,32 @@ Current evidence:
 
 ### M0 Step 4 - ASTRA permission boundary and success metrics
 
-**Next task:** Define what the future ASTRA agent may read, write and execute, then define how its engineering result will be measured.
+**Current task:** Define what the future ASTRA agent may read, write and execute, then define how its engineering result will be measured.
+
+**Permission boundary:** Locked on 14 October 2026. ASTRA may inspect only
+`test-repo/`, run the allowlisted test command `npm.cmd test` from that
+directory with a 60-second timeout, and write only approved target files after
+human approval. It may write run evidence only to `astra-system/runs/`.
+Secrets, outside-workspace reads, arbitrary shell commands, dependency
+installation, deletion, network access, commits, pushes, merges and deployment
+are blocked in the prototype.
+
+**M0 evaluation contract:** The first run must identify the relevant files,
+produce an approved plan, modify only approved files, run `npm.cmd test`, record
+the result and produce complete evidence. Prohibited actions, timeouts,
+repeated actions and out-of-scope patches must be rejected and recorded.
+
+**Evidence contract:** A run record connects the human goal, repository
+observations, approval, actions, changed files, test result, final status and
+limitations. A model response alone is not evidence.
+
+The first public LinkedIn post is intentionally deferred until ASTRA completes a
+stronger end-to-end engineering loop with inspectable evidence. The planned
+first public demonstration is targeted at M7-M8:
+
+```text
+Human Goal -> Repository Understanding -> Plan -> Controlled Change -> Test -> Evidence Report
+```
 
 ## Next ASTRA concepts
 
