@@ -1,6 +1,6 @@
 # ASTRA M1 --- Model Gateway
 
-**Status:** IN PROGRESS - Gateway contract v0 implemented and verified; real provider integration remains
+**Status:** IN PROGRESS - Gateway contract, Ollama adapter and live smoke test verified; observability remains
 
 **Milestone purpose:** Give ASTRA one controlled and provider-independent way
 to request model output before tools, repository access or autonomous actions
@@ -82,7 +82,8 @@ API key or cost. It validates the architecture, not model intelligence.
 - `ModelProvider` protocol;
 - `ModelGateway`;
 - `ModelGatewayError`;
-- `DeterministicProvider`.
+- `DeterministicProvider`;
+- `OllamaProvider` for the local `http://127.0.0.1:11434/api/chat` endpoint.
 
 ### Current behavior
 
@@ -97,15 +98,39 @@ The gateway currently:
 
 ### Verification
 
-`astra-system/tests/test_model_gateway.py` contains five M1 tests. The full
-ASTRA suite contains the five M1 tests plus the ten M0 tests.
+`astra-system/tests/test_model_gateway.py` contains eight M1 tests. The full
+ASTRA suite contains the eight M1 tests plus the ten M0 tests.
 
 ```text
-15 passed in 0.08s
+18 passed in 0.54s
 ```
 
-This proves the gateway contract and validation behavior. It does not prove
-that a real AI provider can produce a useful engineering answer.
+This proves the gateway contract, validation behavior and Ollama response
+handling with deterministic adapter tests. It does not yet prove a live ASTRA
+request through the user's running Ollama server.
+
+### Live smoke test
+
+On 14 October 2026, ASTRA successfully sent a request through
+`ModelGateway(OllamaProvider())` to the local `qwen3:4b` server.
+
+Observed response:
+
+```text
+ASTRA gateway works
+ModelUsage(
+  prompt_tokens=31,
+  completion_tokens=82,
+  total_duration_ns=25268392200,
+  load_duration_ns=55336900,
+  prompt_eval_duration_ns=4002336000,
+  eval_duration_ns=21080930000
+)
+```
+
+This validates the live provider adapter and confirms that Ollama usage and
+timing metadata can reach ASTRA's normalized response. The metadata is printed
+for now; persistent evidence logging is the next implementation step.
 
 ## 5. M1 scope
 
@@ -222,11 +247,11 @@ M1 is complete when ASTRA can:
 8. keep model access separate from repository tools and permissions.
 
 The current implementation satisfies the request validation, normalization,
-empty-response handling and offline-test portions. Real provider integration,
-observability and final safety validation remain open.
+empty-response handling, Ollama adapter, offline tests and live smoke test.
+Persistent observability and final safety validation remain open.
 
 ## 13. Next M1 step
 
-Before connecting a real provider, choose the development provider and define
-the configuration and data-handling rules. Then implement one adapter without
-changing the gateway contract.
+Implement a model-call evidence record that stores the request metadata,
+provider, model, usage, timing, result status and errors without storing secret
+keys or unnecessary private prompt content.

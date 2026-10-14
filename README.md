@@ -332,16 +332,28 @@ permission and foundation tests.
 - `ModelGateway` as the single validated model entry point;
 - `ModelResponse` as the normalized response shape;
 - `DeterministicProvider` for local tests without AI, network or cost.
+- `OllamaProvider` for the local Ollama HTTP API.
 
-M1 verification on 14 October 2026:
+M1 offline verification on 14 October 2026:
 
 ```text
-15 passed in 0.08s
+18 passed in 0.54s
 ```
 
-This validates the gateway contract and request validation. It does not call a
-real AI provider yet. Provider selection, configuration, timeout behavior and
-token/latency/cost logging remain in the next M1 slice.
+This validates the gateway contract, request validation and Ollama response
+handling without network-dependent tests. The next verification is a live
+request from ASTRA through the local Ollama server.
+
+Live smoke verification on 14 October 2026:
+
+```text
+ASTRA gateway works
+ModelUsage(prompt_tokens=31, completion_tokens=82, total_duration_ns=25268392200, ...)
+```
+
+The request travelled through `ModelGateway(OllamaProvider())` and returned a
+normalized response with usage and timing metadata. Persistent model-call
+evidence logging is the next M1 implementation step.
 
 The complete M1 specification is in
 [M1-MODEL-GATEWAY.md](docs/milestones/M1-MODEL-GATEWAY.md). M1 is currently in
