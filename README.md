@@ -339,12 +339,12 @@ permission and foundation tests.
 M1 offline verification on 14 October 2026:
 
 ```text
-30 passed in 0.20s
+31 passed in 0.18s
 ```
 
 This validates the gateway contract, request validation, Ollama response
-handling, configuration validation and prompt-free evidence recording without
-network-dependent tests.
+handling, configuration validation, runtime wiring and prompt-free evidence
+recording without network-dependent tests.
 
 Live smoke verification on 14 October 2026:
 
@@ -362,6 +362,17 @@ Gateway configuration defaults to the local Ollama setup and can be overridden
 with `ASTRA_MODEL`, `OLLAMA_BASE_URL`, `ASTRA_MODEL_TIMEOUT_SECONDS` and
 `ASTRA_MAX_OUTPUT_TOKENS`. Invalid settings and requests over the configured
 output limit are rejected before the provider call.
+
+The reusable runtime command is now available through:
+
+```powershell
+Set-Location .\astra-system
+$env:PYTHONPATH = (Resolve-Path .\src).Path
+.\.venv\Scripts\python.exe -m astra model-call
+```
+
+It prints the model response and the evidence-file location. The command
+requires the local Ollama server to be running.
 
 The complete M1 specification is in
 [M1-MODEL-GATEWAY.md](docs/milestones/M1-MODEL-GATEWAY.md). M1 is currently in

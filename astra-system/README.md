@@ -93,7 +93,7 @@ adapter for the installed Ollama server. The current M1 tests verify request
 validation, normalized responses, Ollama payload mapping, provider errors and
 environment-backed gateway limits.
 
-Full offline ASTRA verification currently reports `30 passed` on 14 October
+Full offline ASTRA verification currently reports `31 passed` on 14 October
 2026. A live request through `ModelGateway(OllamaProvider())` also returned
 `ASTRA gateway works` with token and timing metadata. Persistent model-call
 evidence logging is implemented as `JsonlModelCallRecorder`; tests verify
@@ -111,8 +111,16 @@ ASTRA_MAX_OUTPUT_TOKENS=512
 The defaults work with the local Ollama setup. Invalid values and requests over
 the configured output limit are rejected before the provider call.
 
-The next runtime task is to expose one reusable ASTRA command that creates a
-configured gateway, records its call evidence and prints a concise result.
+The reusable runtime command is:
+
+```powershell
+Set-Location .\astra-system
+$env:PYTHONPATH = (Resolve-Path .\src).Path
+.\.venv\Scripts\python.exe -m astra model-call
+```
+
+It creates the configured local gateway, records prompt-free evidence and
+prints the model response. The command requires Ollama to be running.
 
 The complete milestone specification is available at:
 

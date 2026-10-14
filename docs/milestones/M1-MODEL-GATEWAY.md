@@ -107,17 +107,17 @@ The gateway currently:
 
 ### Verification
 
-The M1 test files contain twenty tests covering the gateway contract, Ollama
-adapter, configuration and evidence recorder. The full ASTRA suite contains
-these twenty M1 tests plus the ten M0 tests.
+The M1 test files contain twenty-one tests covering the gateway contract,
+Ollama adapter, configuration, evidence recorder and runtime wiring. The full
+ASTRA suite contains these twenty-one M1 tests plus the ten M0 tests.
 
 ```text
-30 passed in 0.20s
+31 passed in 0.18s
 ```
 
 This proves the gateway contract, validation behavior, Ollama response handling,
-configuration validation and prompt-free evidence recording with deterministic
-adapter tests.
+configuration validation, runtime wiring and prompt-free evidence recording
+with deterministic adapter tests.
 
 ### Live smoke test
 
@@ -264,8 +264,16 @@ final safety validation remain open.
 
 ## 13. Next M1 step
 
-Expose one reusable ASTRA runtime command that constructs `GatewaySettings`,
-`OllamaProvider` and `JsonlModelCallRecorder` together. It must produce one
-real local Ollama call record under `astra-system/runs/` and print a concise
-result. The record must store provider, model, usage, timing, result status and
-errors without storing secret keys or prompt content.
+The reusable command is:
+
+```powershell
+Set-Location .\astra-system
+$env:PYTHONPATH = (Resolve-Path .\src).Path
+.\.venv\Scripts\python.exe -m astra model-call
+```
+
+It constructs `GatewaySettings`, `OllamaProvider` and
+`JsonlModelCallRecorder` together, then produces one real local Ollama call
+record under `astra-system/runs/` and prints the response. The record stores
+provider, model, usage, timing, result status and errors without storing secret
+keys or prompt content.
