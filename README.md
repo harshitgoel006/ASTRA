@@ -20,11 +20,12 @@ The long-term ASTRA vision remains broad. Implementation proceeds through small,
 
 **Current milestone:** M1 - Model Gateway
 
-**Status:** M0 complete; M1 gateway v0 verified; provider integration remains
+**Status:** M0 complete; M1 gateway v0, local provider and configuration verified; runtime wiring remains
 
-**Current result:** ASTRA has a verified deterministic permission layer and a
-provider-independent model gateway contract. The JavaScript target repository
-baseline remains a separate intentionally failing engineering task.
+**Current result:** ASTRA has a verified deterministic permission layer, a
+provider-independent model gateway contract, a local Ollama adapter, prompt-free
+model-call evidence and environment-backed gateway limits. The JavaScript target
+repository baseline remains a separate intentionally failing engineering task.
 
 ## Project structure
 
@@ -333,16 +334,17 @@ permission and foundation tests.
 - `ModelResponse` as the normalized response shape;
 - `DeterministicProvider` for local tests without AI, network or cost.
 - `OllamaProvider` for the local Ollama HTTP API.
+- `GatewaySettings` for environment-backed model, URL, timeout and output limits.
 
 M1 offline verification on 14 October 2026:
 
 ```text
-18 passed in 0.54s
+30 passed in 0.20s
 ```
 
-This validates the gateway contract, request validation and Ollama response
-handling without network-dependent tests. The next verification is a live
-request from ASTRA through the local Ollama server.
+This validates the gateway contract, request validation, Ollama response
+handling, configuration validation and prompt-free evidence recording without
+network-dependent tests.
 
 Live smoke verification on 14 October 2026:
 
@@ -352,13 +354,19 @@ ModelUsage(prompt_tokens=31, completion_tokens=82, total_duration_ns=25268392200
 ```
 
 The request travelled through `ModelGateway(OllamaProvider())` and returned a
-normalized response with usage and timing metadata. Persistent model-call
-evidence logging is the next M1 implementation step.
+normalized response with usage and timing metadata. A second live smoke test
+also wrote a prompt-free JSONL record to
+`astra-system/runs/model_calls.jsonl`.
+
+Gateway configuration defaults to the local Ollama setup and can be overridden
+with `ASTRA_MODEL`, `OLLAMA_BASE_URL`, `ASTRA_MODEL_TIMEOUT_SECONDS` and
+`ASTRA_MAX_OUTPUT_TOKENS`. Invalid settings and requests over the configured
+output limit are rejected before the provider call.
 
 The complete M1 specification is in
 [M1-MODEL-GATEWAY.md](docs/milestones/M1-MODEL-GATEWAY.md). M1 is currently in
-progress; the deterministic gateway contract is verified, while real provider
-integration remains open.
+progress; the gateway, local provider, evidence recorder and configuration are
+verified, while runtime wiring and final safety validation remain open.
 
 The first public LinkedIn post is intentionally deferred until ASTRA completes a
 stronger end-to-end engineering loop with inspectable evidence. The planned

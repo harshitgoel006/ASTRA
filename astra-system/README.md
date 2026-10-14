@@ -90,12 +90,29 @@ ASTRA request -> ModelGateway -> ModelProvider adapter -> ModelResponse
 `DeterministicProvider` is a local test adapter. It makes no network request
 and represents no real AI capability. `OllamaProvider` is the local HTTP
 adapter for the installed Ollama server. The current M1 tests verify request
-validation, normalized responses, Ollama payload mapping and provider errors.
+validation, normalized responses, Ollama payload mapping, provider errors and
+environment-backed gateway limits.
 
-Full offline ASTRA verification currently reports `18 passed` on 14 October
+Full offline ASTRA verification currently reports `30 passed` on 14 October
 2026. A live request through `ModelGateway(OllamaProvider())` also returned
 `ASTRA gateway works` with token and timing metadata. Persistent model-call
-evidence logging is the next M1 step.
+evidence logging is implemented as `JsonlModelCallRecorder`; tests verify
+success and error records without storing prompt content.
+
+Gateway configuration is now environment-backed:
+
+```text
+ASTRA_MODEL=qwen3:4b
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+ASTRA_MODEL_TIMEOUT_SECONDS=60
+ASTRA_MAX_OUTPUT_TOKENS=512
+```
+
+The defaults work with the local Ollama setup. Invalid values and requests over
+the configured output limit are rejected before the provider call.
+
+The next runtime task is to expose one reusable ASTRA command that creates a
+configured gateway, records its call evidence and prints a concise result.
 
 The complete milestone specification is available at:
 

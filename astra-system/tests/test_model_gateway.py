@@ -4,6 +4,8 @@ import pytest
 
 import astra.model_gateway as model_gateway
 
+from astra.config import GatewaySettings
+from astra.evidence import JsonlModelCallRecorder
 from astra.model_gateway import (
     DeterministicProvider,
     ModelGateway,
@@ -125,6 +127,58 @@ def test_ollama_provider_normalizes_local_api_response(
     assert response.usage.completion_tokens == 33
 
 
+def test_ollama_provider_uses_gateway_settings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = GatewaySettings(
+        model="qwen3:4b",
+        ollama_base_url="http://configured-host:11434",
+        timeout_seconds=12.5,
+        max_output_tokens=128,
+    )
+    provider = OllamaProvider(settings=settings)
+
+    def fake_urlopen(request: object, timeout: float) -> FakeHTTPResponse:
+        assert timeout == 12.5
+        assert getattr(request, "full_url") == "http://configured-host:11434/api/chat"
+        body = json.loads(getattr(request, "data").decode("utf-8"))
+        assert body["options"]["num_predict"] == 128
+        return FakeHTTPResponse(
+            {
+                "model": "qwen3:4b",
+                "message": {"content": "configured"},
+                "done_reason": "stop",
+            }
+        )
+
+    monkeypatch.setattr(model_gateway, "urlopen", fake_urlopen)
+
+    response = provider.complete(
+        ModelRequest(
+            system_prompt="system",
+            user_prompt="request",
+            max_output_tokens=128,
+        )
+    )
+
+    assert response.content == "configured"
+
+
+def test_ollama_provider_rejects_request_over_configured_limit() -> None:
+    provider = OllamaProvider(
+        settings=GatewaySettings(max_output_tokens=128),
+    )
+
+    with pytest.raises(ModelGatewayError, match="configured gateway limit"):
+        provider.complete(
+            ModelRequest(
+                system_prompt="system",
+                user_prompt="request",
+                max_output_tokens=129,
+            )
+        )
+
+
 def test_ollama_provider_converts_connection_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -152,3 +206,37 @@ def test_ollama_provider_rejects_a_malformed_response(
 
     with pytest.raises(ModelGatewayError, match="message.content"):
         provider.complete(make_request())
+
+
+def test_gateway_records_prompt_free_success_evidence(tmp_path) -> None:
+    evidence_path = tmp_path / "runs" / "model_calls.jsonl"
+    gateway = ModelGateway(
+        DeterministicProvider(),
+        recorder=JsonlModelCallRecorder(evidence_path),
+    )
+
+    gateway.complete(make_request())
+
+    record = json.loads(evidence_path.read_text(encoding="utf-8"))
+    assert record["status"] == "success"
+    assert record["provider"] == "deterministic"
+    assert record["model"] == "fixture-v0"
+    assert record["gateway_duration_ns"] >= 0
+    assert "system_prompt" not in record
+    assert "user_prompt" not in record
+
+
+def test_gateway_records_provider_error_evidence(tmp_path) -> None:
+    evidence_path = tmp_path / "runs" / "model_calls.jsonl"
+    gateway = ModelGateway(
+        DeterministicProvider(),
+        recorder=JsonlModelCallRecorder(evidence_path),
+    )
+    invalid_request = ModelRequest(system_prompt="", user_prompt="ignored")
+
+    with pytest.raises(ModelGatewayError):
+        gateway.complete(invalid_request)
+
+    record = json.loads(evidence_path.read_text(encoding="utf-8"))
+    assert record["status"] == "error"
+    assert "system_prompt" in record["error"]

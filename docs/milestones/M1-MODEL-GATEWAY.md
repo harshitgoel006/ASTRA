@@ -1,6 +1,6 @@
 # ASTRA M1 --- Model Gateway
 
-**Status:** IN PROGRESS - Gateway contract, Ollama adapter and live smoke test verified; observability remains
+**Status:** IN PROGRESS - Gateway, Ollama adapter, evidence recorder and configuration verified; runtime wiring remains
 
 **Milestone purpose:** Give ASTRA one controlled and provider-independent way
 to request model output before tools, repository access or autonomous actions
@@ -85,6 +85,13 @@ API key or cost. It validates the architecture, not model intelligence.
 - `DeterministicProvider`;
 - `OllamaProvider` for the local `http://127.0.0.1:11434/api/chat` endpoint.
 
+`astra-system/src/astra/config.py` contains `GatewaySettings`, which loads and
+validates the model name, Ollama base URL, request timeout and maximum output
+tokens from environment variables.
+
+`astra-system/src/astra/evidence.py` contains `JsonlModelCallRecorder`, which
+stores prompt-free provider and timing metadata in an ASTRA run file.
+
 ### Current behavior
 
 The gateway currently:
@@ -94,20 +101,23 @@ The gateway currently:
 3. rejects a non-positive output token limit;
 4. forwards valid requests to the provider adapter;
 5. rejects an empty provider response;
-6. returns a normalized response for a valid call.
+6. returns a normalized response for a valid call;
+7. applies validated environment-backed timeout and output limits;
+8. records prompt-free model-call evidence when a recorder is supplied.
 
 ### Verification
 
-`astra-system/tests/test_model_gateway.py` contains eight M1 tests. The full
-ASTRA suite contains the eight M1 tests plus the ten M0 tests.
+The M1 test files contain twenty tests covering the gateway contract, Ollama
+adapter, configuration and evidence recorder. The full ASTRA suite contains
+these twenty M1 tests plus the ten M0 tests.
 
 ```text
-18 passed in 0.54s
+30 passed in 0.20s
 ```
 
-This proves the gateway contract, validation behavior and Ollama response
-handling with deterministic adapter tests. It does not yet prove a live ASTRA
-request through the user's running Ollama server.
+This proves the gateway contract, validation behavior, Ollama response handling,
+configuration validation and prompt-free evidence recording with deterministic
+adapter tests.
 
 ### Live smoke test
 
@@ -129,8 +139,9 @@ ModelUsage(
 ```
 
 This validates the live provider adapter and confirms that Ollama usage and
-timing metadata can reach ASTRA's normalized response. The metadata is printed
-for now; persistent evidence logging is the next implementation step.
+timing metadata can reach ASTRA's normalized response. A separate live call
+also produced a prompt-free JSONL record under
+`astra-system/runs/model_calls.jsonl`.
 
 ## 5. M1 scope
 
@@ -246,12 +257,15 @@ M1 is complete when ASTRA can:
 7. prove the behavior with deterministic tests;
 8. keep model access separate from repository tools and permissions.
 
-The current implementation satisfies the request validation, normalization,
-empty-response handling, Ollama adapter, offline tests and live smoke test.
-Persistent observability and final safety validation remain open.
+The current implementation satisfies request validation, normalization,
+empty-response handling, Ollama adapter behavior, environment-backed limits,
+live smoke testing and prompt-free JSONL evidence tests. Runtime wiring and
+final safety validation remain open.
 
 ## 13. Next M1 step
 
-Implement a model-call evidence record that stores the request metadata,
-provider, model, usage, timing, result status and errors without storing secret
-keys or unnecessary private prompt content.
+Expose one reusable ASTRA runtime command that constructs `GatewaySettings`,
+`OllamaProvider` and `JsonlModelCallRecorder` together. It must produce one
+real local Ollama call record under `astra-system/runs/` and print a concise
+result. The record must store provider, model, usage, timing, result status and
+errors without storing secret keys or prompt content.

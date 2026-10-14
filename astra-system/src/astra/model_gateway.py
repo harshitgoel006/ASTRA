@@ -6,11 +6,15 @@ protocol. The first real adapter targets a local Ollama server.
 """
 
 import json
-import os
+import time
+from uuid import uuid4
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+
+from .config import GatewaySettings
+from .evidence import ModelCallRecord, ModelCallRecorder
 
 
 class ModelGatewayError(ValueError):
@@ -62,19 +66,77 @@ class ModelProvider(Protocol):
 class ModelGateway:
     """The single controlled entry point for model requests."""
 
-    def __init__(self, provider: ModelProvider) -> None:
+    def __init__(
+        self,
+        provider: ModelProvider,
+        recorder: ModelCallRecorder | None = None,
+    ) -> None:
         self.provider = provider
+        self.recorder = recorder
 
     def complete(self, request: ModelRequest) -> ModelResponse:
         """Validate a request and forward it through the provider adapter."""
 
-        self._validate(request)
-        response = self.provider.complete(request)
+        run_id = f"model-call-{uuid4().hex}"
+        started_at = time.perf_counter_ns()
 
-        if not response.content.strip():
-            raise ModelGatewayError("provider returned an empty response")
+        try:
+            self._validate(request)
+            response = self.provider.complete(request)
+
+            if not response.content.strip():
+                raise ModelGatewayError("provider returned an empty response")
+        except Exception as exc:
+            self._record_error(run_id, started_at, exc)
+            if isinstance(exc, ModelGatewayError):
+                raise
+            raise ModelGatewayError(f"provider call failed: {exc}") from exc
+
+        self._record_success(run_id, started_at, response)
 
         return response
+
+    def _record_success(
+        self,
+        run_id: str,
+        started_at: int,
+        response: ModelResponse,
+    ) -> None:
+        if self.recorder is None:
+            return
+
+        usage = response.usage
+        self.recorder.record(
+            ModelCallRecord(
+                run_id=run_id,
+                provider=response.provider,
+                model=response.model,
+                status="success",
+                gateway_duration_ns=time.perf_counter_ns() - started_at,
+                finish_reason=response.finish_reason,
+                prompt_tokens=usage.prompt_tokens,
+                completion_tokens=usage.completion_tokens,
+                total_duration_ns=usage.total_duration_ns,
+                load_duration_ns=usage.load_duration_ns,
+                prompt_eval_duration_ns=usage.prompt_eval_duration_ns,
+                eval_duration_ns=usage.eval_duration_ns,
+            )
+        )
+
+    def _record_error(self, run_id: str, started_at: int, error: Exception) -> None:
+        if self.recorder is None:
+            return
+
+        self.recorder.record(
+            ModelCallRecord(
+                run_id=run_id,
+                provider=getattr(self.provider, "name", "unknown"),
+                model=getattr(self.provider, "model", "unknown"),
+                status="error",
+                gateway_duration_ns=time.perf_counter_ns() - started_at,
+                error=f"{type(error).__name__}: {error}",
+            )
+        )
 
     @staticmethod
     def _validate(request: ModelRequest) -> None:
@@ -111,16 +173,29 @@ class OllamaProvider:
         self,
         model: str | None = None,
         base_url: str | None = None,
-        timeout_seconds: float = 60.0,
+        timeout_seconds: float | None = None,
+        settings: GatewaySettings | None = None,
     ) -> None:
-        self.model = model or os.getenv("ASTRA_MODEL", "qwen3:4b")
-        self.base_url = (
-            base_url or os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
-        ).rstrip("/")
-        self.timeout_seconds = timeout_seconds
+        gateway_settings = settings or GatewaySettings.from_environment()
+        self.model = model or gateway_settings.model
+        self.base_url = (base_url or gateway_settings.ollama_base_url).rstrip("/")
+        self.timeout_seconds = (
+            gateway_settings.timeout_seconds
+            if timeout_seconds is None
+            else timeout_seconds
+        )
+        self.max_output_tokens = gateway_settings.max_output_tokens
+
+        if self.timeout_seconds <= 0:
+            raise ModelGatewayError("timeout_seconds must be greater than zero")
 
     def complete(self, request: ModelRequest) -> ModelResponse:
         """Send a bounded request to the local Ollama server."""
+
+        if request.max_output_tokens > self.max_output_tokens:
+            raise ModelGatewayError(
+                "request max_output_tokens exceeds the configured gateway limit"
+            )
 
         payload = {
             "model": self.model,
