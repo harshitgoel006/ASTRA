@@ -389,9 +389,8 @@ The next milestone is M2 - Tool Execution and Sandbox. Its first goal is
 to turn the M0 permission decisions into controlled tool calls with timeouts,
 workspace boundaries, audit records and a dry-run mode.
 
-The first public LinkedIn post is intentionally deferred until ASTRA completes a
-stronger end-to-end engineering loop with inspectable evidence. The planned
-first public demonstration is targeted at M7-M8:
+The first public progress post will cover the verified M0 + M1 foundation after
+review. The stronger flagship demonstration remains targeted at M7-M8:
 
 ```text
 Human Goal -> Repository Understanding -> Plan -> Controlled Change -> Test -> Evidence Report

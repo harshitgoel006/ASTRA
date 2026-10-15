@@ -104,6 +104,11 @@ public LinkedIn post until ASTRA demonstrates a stronger end-to-end result. The
 planned public demonstration is the first verified loop from repository
 understanding through evidence, targeted at M7-M8.
 
+**Updated public communication decision:** On 16 October 2026, the developer
+approved a smaller M0 + M1 progress post after review of the verified evidence.
+The M7-M8 end-to-end engineering loop remains the planned flagship public
+demonstration.
+
 ## 5. Proposed technology baseline
 
 | Area | Proposed choice | Reason |
