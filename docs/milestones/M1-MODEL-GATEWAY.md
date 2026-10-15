@@ -1,6 +1,6 @@
 # ASTRA M1 --- Model Gateway
 
-**Status:** IN PROGRESS - Gateway, Ollama adapter, evidence recorder and configuration verified; runtime wiring remains
+**Status:** CLOSURE REVIEW - Gateway, Ollama adapter, evidence recorder, configuration and runtime wiring verified; cost policy and final safety review remain
 
 **Milestone purpose:** Give ASTRA one controlled and provider-independent way
 to request model output before tools, repository access or autonomous actions
@@ -259,10 +259,11 @@ M1 is complete when ASTRA can:
 
 The current implementation satisfies request validation, normalization,
 empty-response handling, Ollama adapter behavior, environment-backed limits,
-live smoke testing and prompt-free JSONL evidence tests. Runtime wiring and
-final safety validation remain open.
+live smoke testing, prompt-free JSONL evidence tests and reusable runtime
+wiring. Cost policy and final safety validation remain open before M1 is
+formally closed.
 
-## 13. Next M1 step
+## 13. M1 closure and next milestone
 
 The reusable command is:
 
@@ -277,3 +278,8 @@ It constructs `GatewaySettings`, `OllamaProvider` and
 record under `astra-system/runs/` and prints the response. The record stores
 provider, model, usage, timing, result status and errors without storing secret
 keys or prompt content.
+
+Before formal M1 closure, define the local versus billed-provider cost policy
+and complete the final safety review. The next major milestone is M2 - Tool
+Execution and Sandbox, beginning with controlled `ToolRequest` and
+`ToolResult` contracts around the already tested permission decisions.

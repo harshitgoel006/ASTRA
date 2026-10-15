@@ -16,16 +16,17 @@ The long-term ASTRA vision remains broad. Implementation proceeds through small,
 
 ## Current status
 
-**Date:** 14 October 2026
+**Date:** 15 October 2026
 
-**Current milestone:** M1 - Model Gateway
+**Current milestone:** M1 closure review; next M2 - Tool Execution and Sandbox
 
-**Status:** M0 complete; M1 gateway v0, local provider and configuration verified; runtime wiring remains
+**Status:** M0 complete; M1 runtime path verified; cost policy and final safety review remain
 
 **Current result:** ASTRA has a verified deterministic permission layer, a
 provider-independent model gateway contract, a local Ollama adapter, prompt-free
 model-call evidence and environment-backed gateway limits. The JavaScript target
 repository baseline remains a separate intentionally failing engineering task.
+ASTRA can now run one bounded local model call through a repeatable CLI command.
 
 ## Project structure
 
@@ -363,7 +364,7 @@ with `ASTRA_MODEL`, `OLLAMA_BASE_URL`, `ASTRA_MODEL_TIMEOUT_SECONDS` and
 `ASTRA_MAX_OUTPUT_TOKENS`. Invalid settings and requests over the configured
 output limit are rejected before the provider call.
 
-The reusable runtime command is now available through:
+The reusable runtime command is available through:
 
 ```powershell
 Set-Location .\astra-system
@@ -376,8 +377,13 @@ requires the local Ollama server to be running.
 
 The complete M1 specification is in
 [M1-MODEL-GATEWAY.md](docs/milestones/M1-MODEL-GATEWAY.md). M1 is currently in
-progress; the gateway, local provider, evidence recorder and configuration are
-verified, while runtime wiring and final safety validation remain open.
+closure review: the gateway, local provider, evidence recorder, configuration
+and runtime wiring are verified, while cost policy and final safety validation
+remain open.
+
+The next major milestone is M2 - Tool Execution and Sandbox. Its first goal is
+to turn the M0 permission decisions into controlled tool calls with timeouts,
+workspace boundaries, audit records and a dry-run mode.
 
 The first public LinkedIn post is intentionally deferred until ASTRA completes a
 stronger end-to-end engineering loop with inspectable evidence. The planned
