@@ -18,11 +18,11 @@ The long-term ASTRA vision remains broad. Implementation proceeds through small,
 
 **Date:** 15 October 2026
 
-**Current milestone:** M1 closure review; next M2 - Tool Execution and Sandbox
+**Current milestone:** M2 - Tool Execution and Sandbox
 
-**Status:** M0 complete; M1 runtime path verified; cost policy and final safety review remain
+**Status:** M0 and M1 complete; M2 planning next
 
-**Current result:** ASTRA has a verified deterministic permission layer, a
+**Current result:** ASTRA has verified M0 and M1 foundations: a deterministic permission layer, a
 provider-independent model gateway contract, a local Ollama adapter, prompt-free
 model-call evidence and environment-backed gateway limits. The JavaScript target
 repository baseline remains a separate intentionally failing engineering task.
@@ -337,15 +337,20 @@ permission and foundation tests.
 - `OllamaProvider` for the local Ollama HTTP API.
 - `GatewaySettings` for environment-backed model, URL, timeout and output limits.
 
-M1 offline verification on 14 October 2026:
+M1 offline verification on 15 October 2026:
 
 ```text
-31 passed in 0.18s
+31 passed in 0.35s
 ```
 
 This validates the gateway contract, request validation, Ollama response
 handling, configuration validation, runtime wiring and prompt-free evidence
 recording without network-dependent tests.
+
+Cost policy: local Ollama and deterministic fixture calls record
+`estimated_cost_usd: 0.0` with an explicit `cost_basis`. This represents direct
+provider billing only; electricity and hardware costs are outside the prototype
+measurement.
 
 Live smoke verification on 14 October 2026:
 
@@ -376,12 +381,11 @@ It prints the model response and the evidence-file location. The command
 requires the local Ollama server to be running.
 
 The complete M1 specification is in
-[M1-MODEL-GATEWAY.md](docs/milestones/M1-MODEL-GATEWAY.md). M1 is currently in
-closure review: the gateway, local provider, evidence recorder, configuration
-and runtime wiring are verified, while cost policy and final safety validation
-remain open.
+[M1-MODEL-GATEWAY.md](docs/milestones/M1-MODEL-GATEWAY.md). M1 is complete: the
+gateway, local provider, evidence recorder, configuration,
+runtime wiring, cost policy and fresh live evidence record are verified.
 
-The next major milestone is M2 - Tool Execution and Sandbox. Its first goal is
+The next milestone is M2 - Tool Execution and Sandbox. Its first goal is
 to turn the M0 permission decisions into controlled tool calls with timeouts,
 workspace boundaries, audit records and a dry-run mode.
 

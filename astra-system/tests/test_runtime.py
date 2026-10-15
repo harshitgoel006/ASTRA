@@ -20,5 +20,7 @@ def test_runtime_connects_provider_gateway_and_evidence_recorder(tmp_path):
     assert record["provider"] == "deterministic"
     assert record["model"] == "fixture-v0"
     assert record["status"] == "success"
+    assert record["estimated_cost_usd"] == 0.0
+    assert record["cost_basis"] == "deterministic_fixture"
     assert "Inspect the bounded runtime path" not in json.dumps(record)
 

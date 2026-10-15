@@ -1,6 +1,6 @@
 # ASTRA M1 --- Model Gateway
 
-**Status:** CLOSURE REVIEW - Gateway, Ollama adapter, evidence recorder, configuration and runtime wiring verified; cost policy and final safety review remain
+**Status:** COMPLETE - Gateway, Ollama adapter, evidence recorder, configuration, runtime wiring and cost policy verified on 15 October 2026
 
 **Milestone purpose:** Give ASTRA one controlled and provider-independent way
 to request model output before tools, repository access or autonomous actions
@@ -85,12 +85,21 @@ API key or cost. It validates the architecture, not model intelligence.
 - `DeterministicProvider`;
 - `OllamaProvider` for the local `http://127.0.0.1:11434/api/chat` endpoint.
 
+The Ollama adapter includes a Qwen-compatible empty thinking prefill so a
+bounded response can reach the final `content` field instead of exhausting its
+output limit in reasoning tokens.
+
 `astra-system/src/astra/config.py` contains `GatewaySettings`, which loads and
 validates the model name, Ollama base URL, request timeout and maximum output
 tokens from environment variables.
 
 `astra-system/src/astra/evidence.py` contains `JsonlModelCallRecorder`, which
 stores prompt-free provider and timing metadata in an ASTRA run file.
+
+Cost policy: local Ollama and deterministic fixture calls record
+`estimated_cost_usd: 0.0` with an explicit `cost_basis`. This is direct provider
+billing only; electricity and hardware costs are outside the prototype
+measurement.
 
 ### Current behavior
 
@@ -112,16 +121,16 @@ Ollama adapter, configuration, evidence recorder and runtime wiring. The full
 ASTRA suite contains these twenty-one M1 tests plus the ten M0 tests.
 
 ```text
-31 passed in 0.18s
+31 passed in 0.35s
 ```
 
 This proves the gateway contract, validation behavior, Ollama response handling,
-configuration validation, runtime wiring and prompt-free evidence recording
-with deterministic adapter tests.
+configuration validation, runtime wiring, cost metadata and prompt-free evidence
+recording with deterministic adapter tests.
 
 ### Live smoke test
 
-On 14 October 2026, ASTRA successfully sent a request through
+On 15 October 2026, ASTRA successfully sent a request through
 `ModelGateway(OllamaProvider())` to the local `qwen3:4b` server.
 
 Observed response:
@@ -139,9 +148,11 @@ ModelUsage(
 ```
 
 This validates the live provider adapter and confirms that Ollama usage and
-timing metadata can reach ASTRA's normalized response. A separate live call
+timing metadata can reach ASTRA's normalized response. The current runtime
 also produced a prompt-free JSONL record under
-`astra-system/runs/model_calls.jsonl`.
+`astra-system/runs/model_calls.jsonl` with `status: success`,
+`finish_reason: stop`, `estimated_cost_usd: 0.0` and
+`cost_basis: local_ollama_no_provider_charge`.
 
 ## 5. M1 scope
 
@@ -259,11 +270,11 @@ M1 is complete when ASTRA can:
 
 The current implementation satisfies request validation, normalization,
 empty-response handling, Ollama adapter behavior, environment-backed limits,
-live smoke testing, prompt-free JSONL evidence tests and reusable runtime
-wiring. Cost policy and final safety validation remain open before M1 is
-formally closed.
+live smoke testing, prompt-free JSONL evidence tests, reusable runtime wiring
+and explicit local cost policy. The fresh live evidence record was verified on
+15 October 2026, so the M1 completion gate is satisfied.
 
-## 13. M1 closure and next milestone
+## 13. M1 completion and next milestone
 
 The reusable command is:
 
@@ -279,7 +290,6 @@ record under `astra-system/runs/` and prints the response. The record stores
 provider, model, usage, timing, result status and errors without storing secret
 keys or prompt content.
 
-Before formal M1 closure, define the local versus billed-provider cost policy
-and complete the final safety review. The next major milestone is M2 - Tool
-Execution and Sandbox, beginning with controlled `ToolRequest` and
-`ToolResult` contracts around the already tested permission decisions.
+M1 is complete. The next major milestone is M2 - Tool Execution and Sandbox, beginning with
+controlled `ToolRequest` and `ToolResult` contracts around the already tested
+permission decisions.

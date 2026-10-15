@@ -22,6 +22,8 @@ class ModelCallRecord:
     load_duration_ns: int | None = None
     prompt_eval_duration_ns: int | None = None
     eval_duration_ns: int | None = None
+    estimated_cost_usd: float | None = None
+    cost_basis: str | None = None
     error: str | None = None
 
 

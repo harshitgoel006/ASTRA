@@ -17,6 +17,9 @@ from .config import GatewaySettings
 from .evidence import ModelCallRecord, ModelCallRecorder
 
 
+_OLLAMA_THINKING_PREFILL = "<think>\n\n</think>\n\n"
+
+
 class ModelGatewayError(ValueError):
     """Raised when a model request is invalid for the gateway."""
 
@@ -32,7 +35,7 @@ class ModelRequest:
 
 @dataclass(frozen=True)
 class ModelUsage:
-    """Provider usage and timing metadata when the provider supplies it."""
+    """Usage, timing and direct provider-cost metadata."""
 
     prompt_tokens: int | None = None
     completion_tokens: int | None = None
@@ -40,6 +43,8 @@ class ModelUsage:
     load_duration_ns: int | None = None
     prompt_eval_duration_ns: int | None = None
     eval_duration_ns: int | None = None
+    estimated_cost_usd: float | None = None
+    cost_basis: str | None = None
 
 
 @dataclass(frozen=True)
@@ -120,6 +125,8 @@ class ModelGateway:
                 load_duration_ns=usage.load_duration_ns,
                 prompt_eval_duration_ns=usage.prompt_eval_duration_ns,
                 eval_duration_ns=usage.eval_duration_ns,
+                estimated_cost_usd=usage.estimated_cost_usd,
+                cost_basis=usage.cost_basis,
             )
         )
 
@@ -161,6 +168,10 @@ class DeterministicProvider:
             provider=self.name,
             model=self.model,
             content=f"Deterministic response for: {request.user_prompt}",
+            usage=ModelUsage(
+                estimated_cost_usd=0.0,
+                cost_basis="deterministic_fixture",
+            ),
         )
 
 
@@ -201,6 +212,8 @@ class OllamaProvider:
             "model": self.model,
             "messages": [
                 {"role": "system", "content": request.system_prompt},
+                {"role": "user", "content": request.user_prompt},
+                {"role": "assistant", "content": _OLLAMA_THINKING_PREFILL},
                 {"role": "user", "content": request.user_prompt},
             ],
             "stream": False,
@@ -247,6 +260,8 @@ class OllamaProvider:
                     result, "prompt_eval_duration"
                 ),
                 eval_duration_ns=_optional_int(result, "eval_duration"),
+                estimated_cost_usd=0.0,
+                cost_basis="local_ollama_no_provider_charge",
             ),
         )
 

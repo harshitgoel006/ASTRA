@@ -33,6 +33,8 @@ def test_gateway_returns_a_normalized_provider_response() -> None:
         "Deterministic response for: Explain the first bounded engineering task."
     )
     assert response.finish_reason == "stop"
+    assert response.usage.estimated_cost_usd == 0.0
+    assert response.usage.cost_basis == "deterministic_fixture"
 
 
 def test_gateway_rejects_an_empty_system_prompt() -> None:
@@ -114,6 +116,14 @@ def test_ollama_provider_normalizes_local_api_response(
         assert body["model"] == "qwen3:4b"
         assert body["stream"] is False
         assert body["options"]["num_predict"] == 512
+        assert [message["role"] for message in body["messages"]] == [
+            "system",
+            "user",
+            "assistant",
+            "user",
+        ]
+        assert body["messages"][2]["content"] == "<think>\n\n</think>\n\n"
+        assert body["messages"][1]["content"] == body["messages"][3]["content"]
         return FakeHTTPResponse(ollama_payload)
 
     monkeypatch.setattr(model_gateway, "urlopen", fake_urlopen)
@@ -125,6 +135,8 @@ def test_ollama_provider_normalizes_local_api_response(
     assert response.content == "ASTRA API works"
     assert response.usage.prompt_tokens == 18
     assert response.usage.completion_tokens == 33
+    assert response.usage.estimated_cost_usd == 0.0
+    assert response.usage.cost_basis == "local_ollama_no_provider_charge"
 
 
 def test_ollama_provider_uses_gateway_settings(
@@ -222,6 +234,8 @@ def test_gateway_records_prompt_free_success_evidence(tmp_path) -> None:
     assert record["provider"] == "deterministic"
     assert record["model"] == "fixture-v0"
     assert record["gateway_duration_ns"] >= 0
+    assert record["estimated_cost_usd"] == 0.0
+    assert record["cost_basis"] == "deterministic_fixture"
     assert "system_prompt" not in record
     assert "user_prompt" not in record
 

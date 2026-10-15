@@ -93,11 +93,15 @@ adapter for the installed Ollama server. The current M1 tests verify request
 validation, normalized responses, Ollama payload mapping, provider errors and
 environment-backed gateway limits.
 
-Full offline ASTRA verification currently reports `31 passed` on 14 October
+Full offline ASTRA verification currently reports `31 passed` on 15 October
 2026. A live request through `ModelGateway(OllamaProvider())` also returned
 `ASTRA gateway works` with token and timing metadata. Persistent model-call
 evidence logging is implemented as `JsonlModelCallRecorder`; tests verify
 success and error records without storing prompt content.
+
+Cost policy is explicit: local Ollama and deterministic fixture calls record a
+direct provider charge of `0.0` USD. Electricity and hardware costs are outside
+this prototype measurement.
 
 Gateway configuration is now environment-backed:
 
@@ -121,6 +125,11 @@ $env:PYTHONPATH = (Resolve-Path .\src).Path
 
 It creates the configured local gateway, records prompt-free evidence and
 prints the model response. The command requires Ollama to be running.
+
+M1 completion evidence includes `31 passed` in the offline suite and a fresh
+live record with `status: success`, `finish_reason: stop`,
+`estimated_cost_usd: 0.0` and no prompt content. The next milestone is M2,
+which will add controlled tool execution around the M0 permission decisions.
 
 The complete milestone specification is available at:
 
